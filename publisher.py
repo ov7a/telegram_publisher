@@ -13,11 +13,11 @@ date_parts = list(map(int, os.path.basename(content_path).split('-')[0:3]))
 post_date = datetime(year=date_parts[0], month=date_parts[1], day=date_parts[2], hour=UTC_HOUR, second=1)
 
 post = frontmatter.load(content_path)
-updated_content = "\n\n".join([
-	", ".join(map(lambda tag: "#" + tag, post['tags'])), 
-	post['title'],
+updated_content = "\n\n".join(filter(None, [
+	", ".join(map(lambda tag: "#" + tag, post['tags'])) if 'tags' in post else None,
+	post.get('title'),
 	post.content
-])
+]))
 
 def get_env(name, message, cast=str):
 	if name in os.environ:
