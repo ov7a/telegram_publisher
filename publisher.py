@@ -5,6 +5,7 @@ from telethon.sync import TelegramClient
 import socks
 import frontmatter
 from datetime import datetime
+import keyring
 
 content_path = sys.argv[1]
 
@@ -19,9 +20,14 @@ updated_content = "\n\n".join(filter(None, [
 	post.content
 ]))
 
-def get_env(name, message, cast=str):
+def get_api_info(name, message, cast=str):
 	if name in os.environ:
 		return os.environ[name]
+		
+	keyring_value = keyring.get_password("tg_api", name)
+	if keyring_value:
+		return keyring_value
+
 	while True:
 		value = input(message)
 		try:
@@ -31,8 +37,8 @@ def get_env(name, message, cast=str):
 			time.sleep(1)
 
 session = os.environ.get('TG_SESSION', 'publisher')
-api_id = get_env('TG_API_ID', 'Enter your API ID: ', int)
-api_hash = get_env('TG_API_HASH', 'Enter your API hash: ')
+api_id = get_api_info('TG_API_ID', 'Enter your API ID: ', int)
+api_hash = get_api_info('TG_API_HASH', 'Enter your API hash: ')
 
 channel_name='minutkaprosvescheniya' 
 
