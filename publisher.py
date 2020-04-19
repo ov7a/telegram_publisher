@@ -4,10 +4,12 @@ import sys
 from telethon.sync import TelegramClient
 import socks
 import frontmatter
+import re
 from datetime import datetime
 import keyring
 
 content_path = sys.argv[1]
+file_path = sys.argv[2] if len(sys.argv) > 2 else None
 
 UTC_HOUR = 7
 date_parts = list(map(int, os.path.basename(content_path).split('-')[0:3]))
@@ -17,7 +19,7 @@ post = frontmatter.load(content_path)
 updated_content = "\n\n".join(filter(None, [
 	", ".join(map(lambda tag: "#" + tag, post['tags'])) if 'tags' in post else None,
 	post.get('title'),
-	post.content
+	re.sub("!\[.*?\]\(.*?\)\n*", "", post.content)
 ]))
 
 def get_api_info(name, message, cast=str):
@@ -45,7 +47,5 @@ channel_name='minutkaprosvescheniya'
 proxy = (socks.SOCKS5, 'localhost', 9050) 
 	
 with TelegramClient(session, api_id, api_hash, proxy=proxy) as client:
-	client.send_message(channel_name, updated_content, parse_mode='md', schedule=post_date)
+	client.send_message(channel_name, updated_content, parse_mode='md', schedule=post_date, file=file_path)
 
-
-	
