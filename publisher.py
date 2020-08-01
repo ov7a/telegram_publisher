@@ -30,7 +30,7 @@ updated_content = "\n\n".join(filter(None, [
 def get_api_info(name, message, cast=str):
 	if name in os.environ:
 		return os.environ[name]
-		
+
 	keyring_value = keyring.get_password("tg_api", name)
 	if keyring_value:
 		return keyring_value
@@ -47,7 +47,7 @@ session = os.environ.get('TG_SESSION', 'publisher')
 api_id = get_api_info('TG_API_ID', 'Enter your API ID: ', int)
 api_hash = get_api_info('TG_API_HASH', 'Enter your API hash: ')
 
-channel_name='minutkaprosvescheniya' 
+channel_name='minutkaprosvescheniya'
 
 with TelegramClient(session, api_id, api_hash) as client:
 	client.send_message(channel_name, updated_content, parse_mode='md', schedule=post_date, file=file_path)
