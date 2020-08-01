@@ -44,8 +44,6 @@ api_hash = get_api_info('TG_API_HASH', 'Enter your API hash: ')
 
 channel_name='minutkaprosvescheniya' 
 
-proxy = (socks.SOCKS5, 'localhost', 9050) 
-	
-with TelegramClient(session, api_id, api_hash, proxy=proxy) as client:
+with TelegramClient(session, api_id, api_hash) as client:
 	client.send_message(channel_name, updated_content, parse_mode='md', schedule=post_date, file=file_path)
 
