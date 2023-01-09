@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+import asyncio
 import os
 import sys
-from telethon.sync import TelegramClient
+from telethon import TelegramClient
+from telethon.extensions import markdown
 import socks
 import frontmatter
 import re
@@ -51,6 +53,13 @@ api_hash = get_api_info('TG_API_HASH', 'Enter your API hash: ')
 
 channel_name='minutkaprosvescheniya'
 
-with TelegramClient(session, api_id, api_hash) as client:
-	client.send_message(channel_name, updated_content, parse_mode='md', schedule=post_date, file=file_path)
+import telethon
+text, entities = markdown.parse(updated_content)
+
+async def main():
+	async with TelegramClient(session, api_id, api_hash) as client:
+		
+		await client.send_message(channel_name, text, formatting_entities=entities, schedule=post_date, file=file_path)
+		
+asyncio.run(main())
 
