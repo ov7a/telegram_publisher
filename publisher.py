@@ -19,7 +19,7 @@ post_date = datetime(year=date_parts[0], month=date_parts[1], day=date_parts[2],
 
 def process_content(content):
 	content = re.sub("!\[.*?\]\(.*?\)\n*", "", content)
-	content = re.sub("```[a-z]+", "```", content)
+	content = re.sub(r"\[`([^\]]*)`\]", r"[\1]", content)
 	content = re.sub(r"<kbd>(.*?)</kbd>", r"`\1`", content)
 	content = re.sub(r"\[(.*?)\]\((/.*?)\)", r"[\1](https://ov7a.github.io\2)", content)
 	return content
