@@ -1,3 +1,2 @@
-Telethon
-PySocks
-python-frontmatter
+python-frontmatter==1.0.0
+Pyrogram==2.0.106

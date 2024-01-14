@@ -1,25 +1,22 @@
 #!/usr/bin/env python3
-import asyncio
 import os
 import sys
-from telethon import TelegramClient
-from telethon.extensions import markdown
-import socks
+from pyrogram import Client
 import frontmatter
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 import keyring
+import time
 
 content_path = sys.argv[1]
-file_path = sys.argv[2] if len(sys.argv) > 2 else None
 
 UTC_HOUR = 7
 date_parts = list(map(int, os.path.basename(content_path).split('-')[0:3]))
-post_date = datetime(year=date_parts[0], month=date_parts[1], day=date_parts[2], hour=UTC_HOUR, second=1)
+post_date = datetime(year=date_parts[0], month=date_parts[1], day=date_parts[2], hour=UTC_HOUR, second=1, tzinfo=timezone.utc)
 
 def process_content(content):
 	content = re.sub("!\[.*?\]\(.*?\)\n*", "", content)
-	content = re.sub(r"\[`([^\]]*)`\]", r"[\1]", content)
+	content = re.sub(r"\[([^`]*)`([^\]]*)`([^`]*)\]", r"[\1\2\3]", content)
 	content = re.sub(r"<kbd>(.*?)</kbd>", r"`\1`", content)
 	content = re.sub(r"\[(.*?)\]\((/.*?)\)", r"[\1](https://ov7a.github.io\2)", content)
 	return content
@@ -47,19 +44,16 @@ def get_api_info(name, message, cast=str):
 			print(e, file=sys.stderr)
 			time.sleep(1)
 
-session = os.environ.get('TG_SESSION', 'publisher')
 api_id = get_api_info('TG_API_ID', 'Enter your API ID: ', int)
 api_hash = get_api_info('TG_API_HASH', 'Enter your API hash: ')
 
 channel_name='minutkaprosvescheniya'
 
-import telethon
-text, entities = markdown.parse(updated_content)
+client = Client("publisher", api_id, api_hash, no_updates=True)
 
 async def main():
-	async with TelegramClient(session, api_id, api_hash) as client:
+	async with client:	
+		await client.send_message(channel_name, updated_content, schedule_date=post_date)
 		
-		await client.send_message(channel_name, text, formatting_entities=entities, schedule=post_date, file=file_path)
-		
-asyncio.run(main())
+client.run(main())
 
