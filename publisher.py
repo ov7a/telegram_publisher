@@ -12,7 +12,7 @@ content_path = sys.argv[1]
 
 UTC_HOUR = 7
 date_parts = list(map(int, os.path.basename(content_path).split('-')[0:3]))
-post_date = datetime(year=date_parts[0], month=date_parts[1], day=date_parts[2], hour=UTC_HOUR, second=1, tzinfo=timezone.utc)
+post_date = datetime(year=date_parts[0], month=date_parts[1], day=date_parts[2], hour=UTC_HOUR-1, minute=59, second=1, tzinfo=timezone.utc)
 
 def process_content(content):
 	content = re.sub("!\[.*?\]\(.*?\)\n*", "", content)
