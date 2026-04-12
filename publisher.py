@@ -9,16 +9,29 @@ import keyring
 import time
 
 content_path = sys.argv[1]
+channel_name='minutkaprosvescheniya'
 
-UTC_HOUR = 7
-date_parts = list(map(int, os.path.basename(content_path).split('-')[0:3]))
+UTC_HOUR = 8
+content_dir, content_filename = os.path.split(content_path)
+date_parts = list(map(int, content_filename.split('-')[0:3]))
 post_date = datetime(year=date_parts[0], month=date_parts[1], day=date_parts[2], hour=UTC_HOUR-1, minute=59, second=1, tzinfo=timezone.utc)
+
+def insert_tg_link(match):
+	post = f"{content_dir}/{match.group(2).replace('/', '-')}-{match.group(3)}.md"
+	if (not os.path.exists(post)):
+		print("note" + post)
+		return match.group(0)
+	data = frontmatter.load(post)
+	if data.get("category") == "blog" or not data.get("tg_id"):
+		return match.group(0)
+	return f"[{match.group(1)}](https://t.me/{channel_name}/{data['tg_id']})"
 
 def process_content(content):
 	content = re.sub("!\[.*?\]\(.*?\)\n*", "", content)
 	content = re.sub(r"\[([^`]*)`([^\]]*)`([^`]*)\]", r"[\1\2\3]", content)
 	content = re.sub(r"<kbd>(.*?)</kbd>", r"`\1`", content)
-	content = re.sub(r"\[(.*?)\]\((/.*?)\)", r"[\1](https://ov7a.github.io\2)", content)
+	content = re.sub(r"\[([^]]*?)\]\(/(\d{4}/\d{2}/\d{2})/([^)]*?).html\)", insert_tg_link, content)
+	content = re.sub(r"\[([^]]*?)\]\((/.*?)\)", r"[\1](https://ov7a.github.io\2)", content)
 	return content
 
 post = frontmatter.load(content_path)
@@ -47,13 +60,11 @@ def get_api_info(name, message, cast=str):
 api_id = get_api_info('TG_API_ID', 'Enter your API ID: ', int)
 api_hash = get_api_info('TG_API_HASH', 'Enter your API hash: ')
 
-channel_name='minutkaprosvescheniya'
-
 client = Client("publisher", api_id, api_hash, no_updates=True)
 
 async def main():
-	async with client:	
+	async with client:
 		await client.send_message(channel_name, updated_content, schedule_date=post_date)
-		
+
 client.run(main())
 
